@@ -227,7 +227,7 @@ class VPN:
         up = "/bin/kill -USR1 %i" % pid
 
         command = [
-            "openvpn",
+            "./namespaced-openvpn",
             "--script-security", "2",
             "--route-up", up
         ]
@@ -346,9 +346,9 @@ class VPN:
         self.log.info("Performing connection speed test. Press CTRL+C to " +
                       "stop it.")
         try:
-            speedtest()
+            subprocess.call(["ip", "netns", "exec", "protected", sys.argv[0], "--speedtest"])
         except KeyboardInterrupt:
-            print("")
+            print("Stopped...")
 
     def setup_iptables_rules(self):
         """Sets up iptables rules for blocking traffic that's not going
@@ -557,6 +557,7 @@ def speedtest():
 def parse_args():
     """Parses the command line arguments."""
     p = argparse.ArgumentParser(description="Client for vpngate.net VPNs")
+    p.add_argument("--speedtest", action="store_true", help="Just run a speedtest")
     p.add_argument("--country", "-c", action="append",
                    help="A 2 char country code (e.g. CA for Canada) from " +
                         "which to look for a VPNs. If specified multiple " +
@@ -622,6 +623,8 @@ def vpn_list_main(args):
 
 
 def main(args):
+    if args.speedtest:
+        return speedtest()
     if args.ovpnfile:
         # Load a single VPN from the given file.
         return single_vpn_main(args)
