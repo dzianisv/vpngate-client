@@ -200,9 +200,11 @@ class VPN:
 
                 # Perform a speedtest on the VPN
                 if not self.speedtest():
-                    logging.warning("Speedtest failed, terminating connection")
+                    self.logger.warning("Speedtest failed, terminating connection")
                     proc.terminate()
                     return False
+                
+                self.logger.info("VPN server is good")
 
                 if self.args.iptables:
                     self.setup_iptables_rules()

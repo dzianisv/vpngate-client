@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+ 
+ip netns exec protected sh -c "PS1=\"\$(ip netns identify) >\" $*"
