@@ -231,8 +231,12 @@ class VPN:
 
         command = [
             "./namespaced-openvpn",
-            "--script-security", "2",
-            "--route-up", up
+            "--namespace",
+            NAMESPACE,
+            "--script-security", 
+            "2",
+            "--route-up", 
+            up
         ]
 
         # Only use 'update-resolv-conf' in '--up' and '--down' if really exists on filesystem.
@@ -555,6 +559,7 @@ def speedtest():
 def parse_args():
     """Parses the command line arguments."""
     p = argparse.ArgumentParser(description="Client for vpngate.net VPNs")
+    p.add_argument("--namespace", type=str, default="protected", help="Network Namespace to start OpenVPN")
     p.add_argument("--speedtest", action="store_true", help="Just run a speedtest")
     p.add_argument("--country", "-c", action="append",
                    help="A 2 char country code (e.g. CA for Canada) from " +
@@ -629,6 +634,7 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_args()
+    NAMESPACE = args.namespace
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
