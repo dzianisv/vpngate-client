@@ -191,38 +191,41 @@ class VPN:
             cmd = self.build_ovpn_command(conf.name)
 
             self.logger.debug("Executing %s", cmd)
-            with subprocess.Popen(cmd, start_new_session=True) as proc:
-                # Wait for the VPN to initialize
-                if not self.wait_for_vpn_ready(proc):
-                    # VPN failed to initialize. Indicate the caller to try the
-                    # next one.
-                    return False
+            with open("openvpn.log", "wb") as log_file:
+                with subprocess.Popen(cmd, stdout=log_file, stderr=log_file) as proc:
+                    # Wait for the VPN to initialize
+                    if not self.wait_for_vpn_ready(proc):
+                        # VPN failed to initialize. Indicate the caller to try the
+                        # next one.
+                        return False
 
-                # Perform a speedtest on the VPN
-                if not self.speedtest():
-                    self.logger.warning("Speedtest failed, terminating connection")
-                    proc.terminate()
-                    return False
-                
-                self.logger.info("VPN server is good")
+                    # Perform a speedtest on the VPN
+                    if not self.speedtest():
+                        self.logger.warning("Speedtest failed, terminating connection")
+                        proc.terminate()
+                        return False
+                    
+                    self.logger.info("VPN server is healthy")
 
-                if self.args.iptables:
-                    self.setup_iptables_rules()
-
-                try:
-                    while self.speedtest():
-                        self.logger.debug("Speed test passed...")
-                        time.sleep(60 * 5)
-                except KeyboardInterrupt:
-                    pass
-                finally:
                     if self.args.iptables:
-                        self.clear_iptables_rules()
-                    self.logger.info("Closing VPN connection.")
-                    self.terminate_vpn(proc)
+                        self.setup_iptables_rules()
 
-            return True
+                    try:
+                        i = 0
+                        while self.speedtest():
+                            i += 1
+                            self.logger.debug("Periodic %dth speed test passed", i)
+                            time.sleep(60 * 5)
+                    except KeyboardInterrupt:
+                        pass
+                    finally:
+                        if self.args.iptables:
+                            self.clear_iptables_rules()
+                        self.logger.info("Closing VPN connection.")
+                        self.terminate_vpn(proc)
 
+                return True
+    
     def build_ovpn_command(self, conffile):
         """Builds the openvpn command to connect to this VPN."""
         # Make openvpn send USR1 on VPN up and USR2 on VPN down
@@ -230,7 +233,7 @@ class VPN:
         up = "/bin/kill -USR1 %i" % pid
 
         command = [
-            "./namespaced-openvpn",
+            os.path.join(os.path.dirname(__file__), "namespaced-openvpn"),
             "--namespace",
             NAMESPACE,
             "--script-security", 
@@ -322,7 +325,7 @@ class VPN:
         self.logger.info("Terminating VPN connection")
         proc.terminate()
         if not terminated():
-            self.warning("Termination timed out. Killing the process.")
+            self.logger.warning("Termination timed out. Killing the process.")
             proc.kill()
             if not terminated():
                 self.logger.critical("The VPN process can't be killed!")
@@ -331,9 +334,6 @@ class VPN:
 
     def speedtest(self):
         """Performs a speed test on the VPN connection."""
-
-        self.logger.info("Performing connection speed test. Press CTRL+C to " +
-                      "stop it.")
 
         try:
             return subprocess.call(["ip", "netns", "exec", NAMESPACE, sys.argv[0], "--speedtest"]) == 0
@@ -553,7 +553,7 @@ def speedtest():
     total_throughput = total_bytes / total_time
 
     print(f"Total time {total_time}s, total throughput {total_throughput} Bps")
-    return 0 if total_throughput > 1024 * 1024 else -1
+    return 0 if total_throughput > 5 * 1024 else -1
 
 
 def parse_args():

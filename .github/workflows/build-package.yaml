@@ -1,0 +1,38 @@
+name: Build Package
+on:
+  release:
+    types:
+      - published
+  push:
+
+jobs:
+  Build-Release-Package:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      
+      - name: Install Dev depedencies
+        run: sudo ./install-dev-requirements.sh
+
+      - name: Build Package
+        run: ./package.sh
+
+      - name: Install Package
+        run: |
+          sudo apt-get install -yq ./*.deb
+
+      - name: Test
+        run: |
+          sudo systemctl enable --now vpngate.service
+          sudo systemclt status vpngate.service
+          sudo systemctl stop vpngate.service
+
+      - name: Publish Package
+        run: |
+          if [ ${{ github.event_name }} = "release" ]; then
+            RELEASE_VERSION_NAME="${GITHUB_REF/refs\/tags\//}"
+            hub release edit -m "" -a *.deb "${RELEASE_VERSION_NAME}"
+          fi
