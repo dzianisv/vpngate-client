@@ -8,7 +8,7 @@ before connecting to the VPN server.
 speed is good enough for you or if you want to try the next one on the list.
 * Cross-ARCH `.deb` packages.
 * `namespaced-openvpn` script creates a Linux network namespace with OpenVPN `tun0` only to prevent packet leaks on OpenVPN failures.
-* `vpngate.service` and `vpngate@netns.service` systemd services for GNU/Linux distributions.
+* Systemd `vpngate-client.service` and `vpngate-client@netns.service` services for GNU/Linux distributions.
 * Filters VPN servers by their geographical location (country or VPNs in Europe).
 
 ## Dependencies
@@ -21,14 +21,14 @@ This client has following dependencies:
 Let systemd care about service health and start it on boot
 
 ```sh
-systemctl enabel --now vpngate
+systemctl enabel --now vpngate-client
 ```
 
 or start an Openvpn process inside a Linux Network Namespace `protectedns`. 
 In this case the network stack in the namespace will be fully isolated, 
 no leaks possible, all the packets go through openvpn or "die".
 ```sh
-systemctl enable --now vpngate@protectedns
+systemctl enable --now vpngate-cient@protectedns
 ```
 Now you can test it
 ```sh

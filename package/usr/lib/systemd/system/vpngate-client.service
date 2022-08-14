@@ -1,0 +1,12 @@
+[Unit]
+After=network-online.target
+
+[Service]
+ExecStart=/usr/lib/vpngate-client/vpngate-client
+RestartSec=10
+Restart=on-failure
+WorkingDirectory=/run/vpngate-client/
+RuntimeDirectory=vpngate-client
+
+[Install]
+WantedBy=multi-user.target

@@ -1,9 +1,9 @@
 #!/bin/sh
 set -eu
 
-mkdir -p package/usr/lib/vpngate
+mkdir -p package/usr/lib/vpngate-client
 for f in vpngate-client namespaced-openvpn; do
-    install -m 0755 "$f" "package/usr/lib/vpngate/$f"
+    install -m 0755 "$f" "package/usr/lib/vpngate-client/$f"
 done
 
 tag=$(git describe --tags || echo "0.0.0")

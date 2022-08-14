@@ -11,9 +11,9 @@ curl_test() {
     return 1
 }
 
-systemctl enable --now vpngate@protected.service
-systemctl status --no-pager vpngate@protected.service
+systemctl enable --now vpngate-client@protected.service
+systemctl status --no-pager vpngate-client@protected.service
 
 curl_test
 
-systemctl stop vpngate@protected.service
+systemctl stop vpngate-client@protected.service
