@@ -519,8 +519,9 @@ def speedtest():
     """Performs a speedtest printing connection speeds in kb/s once every
        500ms.
     """
+    print("Perfoming network throughput test...")
     start_ts = time.time()
-    req = urllib.request.urlopen(SPEED_TEST_URL)
+    req = urllib.request.urlopen(SPEED_TEST_URL, timeout=5)
 
     # Bytes since previous checkpoint
     bytes_read = 0
