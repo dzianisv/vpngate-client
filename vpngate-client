@@ -338,7 +338,7 @@ class VPN:
         """Performs a speed test on the VPN connection."""
 
         try:
-            return subprocess.call(["ip", "netns", "exec", NAMESPACE, sys.argv[0], "--speedtest"]) == 0
+            return subprocess.call((["ip", "netns", "exec", NAMESPACE] if NAMESPACE else []) + [ sys.argv[0], "--speedtest"]) == 0
         except KeyboardInterrupt:
             print("Stopped...")
 
