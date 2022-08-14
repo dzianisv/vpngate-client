@@ -12,6 +12,14 @@ This client has following dependencies:
 * [python](https://python.org) (at least v3.3)
 * [OpenVPN](https://openvpn.net/)
 
+## systemd.service usage
+Let systemd care about service health and start it on boot
+
+```sh
+systemctl enabel --now vpngate
+```
+
+
 ## Usage
 
 Note: `sudo` is required for OpenVPN.
