@@ -16,6 +16,12 @@ This client has following dependencies:
 * [python](https://python.org) (at least v3.3)
 * [OpenVPN](https://openvpn.net/)
 
+## Installation
+```sh
+curl -Lo /tmp/vpngate-client.deb "https://github.com/dzianisv/vpngate-client/releases/download/1.0.0/vpngate-client_1.0.0_all.deb"
+apt install -yq /tmp/vpngate-client.deb
+rm /tmp/vpngate-client.deb
+```
 
 ## systemd.service usage
 Let systemd care about service health and start it on boot
