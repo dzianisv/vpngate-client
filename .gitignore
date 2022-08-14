@@ -3,3 +3,4 @@
 .pybuild
 __pycache__
 *.log
+package/usr/lib/vpngate/
