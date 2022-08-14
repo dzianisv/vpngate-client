@@ -12,6 +12,7 @@ This client has following dependencies:
 * [python](https://python.org) (at least v3.3)
 * [OpenVPN](https://openvpn.net/)
 
+
 ## systemd.service usage
 Let systemd care about service health and start it on boot
 
@@ -19,8 +20,23 @@ Let systemd care about service health and start it on boot
 systemctl enabel --now vpngate
 ```
 
+or start an Openvpn process inside a Linux Network Namespace `protectedns`. 
+In this case the network stack in the namespace will be fully isolated, 
+no leaks possible, all the packets go through openvpn or "die".
+```sh
+systemctl enable --now vpngate@protectedns
+```
+Now you can test it
+```sh
+ip netns exec protectedns curl "api.ipify.org"
+```
+Or start a browser
+```sh
+sudo -E ip netns exec protectedns sudo -u $(id -u -n) firefox
+```
 
-## Usage
+
+## Script usage
 
 Note: `sudo` is required for OpenVPN.
 
