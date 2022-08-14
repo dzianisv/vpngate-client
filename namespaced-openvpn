@@ -65,7 +65,7 @@ def setup_namespace(namespace):
     if os.path.exists(os.path.join('/var/run/netns', namespace)):
         adapters = _adapter_names(namespace)
         if adapters != [b'lo']:
-            LOG.error('Namespace %s already has adapters %s, exiting.' % (namespace, adapters))
+            LOG.error('Namespace %s already has adapters %s, exiting.', namespace, adapters)
             raise Exception
     else:
         subprocess.check_call(_enter_namespace_cmd('') + [IP_CMD, 'netns', 'add', namespace])
@@ -77,7 +77,7 @@ def parse_dhcp_opts(env):
     dnsopt_to_values = defaultdict(list)
     i = 1
     while True:
-        foreign_opt = env.get('foreign_option_%d' % (i,))
+        foreign_opt = env.get(f'foreign_option_{i}')
         if not foreign_opt:
             break
         # e.g., foreign_option_1=dhcp-option DNS 8.8.8.8
@@ -108,8 +108,8 @@ def write_resolvconf(outfile, opts):
     search_string = ' '.join(search)
     if len(search_string) > MAX_SEARCH_LEN:
         LOG.warning(
-            'Search domains exceed %d-character limit, not writing to resolv.conf' %
-            (MAX_SEARCH_LEN,),
+            'Search domains exceed %d-character limit, not writing to resolv.conf',
+            MAX_SEARCH_LEN
         )
         search_string = None
 
@@ -118,6 +118,7 @@ def write_resolvconf(outfile, opts):
     if search_string:
         print('search', search_string, file=outfile)
     for addr in nameservers:
+        LOG.info("Using nameserver %s", addr)
         print('nameserver', addr, file=outfile)
 
     if not nameservers:
@@ -149,8 +150,9 @@ def setup_dns(namespace, dns_type):
         subprocess.check_call([MOUNT_CMD, '--bind', '/', mountdir])
         etc_resolvconf = os.path.join(mountdir, 'etc/resolv.conf')
 
+    LOG.info("DNS configuration: %r", resolv_data)
     try:
-        with open(etc_resolvconf, 'w') as outfile:
+        with open(etc_resolvconf, 'w', encoding='utf8') as outfile:
             write_resolvconf(outfile, resolv_data)
     finally:
         if mountdir is not None:
@@ -275,19 +277,18 @@ class InvalidArgs(ValueError):
 def serialize_disableargs(disable_ipv4, disable_ipv6):
     if disable_ipv4:
         return '4'
-    elif disable_ipv6:
+    if disable_ipv6:
         return '6'
-    else:
-        return '0'
+    return '0'
 
 
 def deserialize_disableargs(arg):
     if arg == '4':
         return True, False
-    elif arg == '6':
+    if arg == '6':
         return False, True
-    else:
-        return False, False
+
+    return False, False
 
 
 def parse_validate_args(cl_args):
@@ -295,8 +296,8 @@ def parse_validate_args(cl_args):
     parser = argparse.ArgumentParser(usage='%(prog)s [OPTIONS] OPENVPN_ARGS...', add_help=False)
     parser.add_argument(
         "--namespace",
-        help="""Name of target network namespace (default: `%s`). For the root namespace,
-        pass the empty string.""" % (DEFAULT_NAMESPACE,),
+        help=f"""Name of target network namespace (default: `{DEFAULT_NAMESPACE}`). For the root namespace,
+        pass the empty string.""",
         default=DEFAULT_NAMESPACE
     )
     parser.add_argument(

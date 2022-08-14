@@ -237,7 +237,7 @@ class VPN:
         command = ([
             os.path.join(os.path.dirname(__file__), "namespaced-openvpn"),
             "--namespace", NAMESPACE,
-            "--dns", "1.1.1.1,8.8.8.8,9.9.9.9"
+            "--dns", "1.1.1.1,8.8.8.8,9.9.9.9",
         ] if NAMESPACE else ["openvpn"]) + [
             "--script-security", "2",
             "--route-up", up 
@@ -547,16 +547,16 @@ def speedtest():
 
         if delta_t > 0.5:
             # Yield the current speed.
-            kbps = bytes_read / delta_t / 1024
-            print("Current Speed: % 5.1f kb/s" % kbps, end="\r")
+            troughput = bytes_read / delta_t / (1024 * 1024)
+            print(f"\rCurrent Speed: {troughput} MBps\t\t", end="")
             bytes_read = 0
             prev_checkpoint = time.perf_counter()
 
     total_time = time.time()-start_ts
     total_throughput = total_bytes / total_time
 
-    print(f"Total time {total_time}s, total throughput {total_throughput} Bps")
-    return 0 if total_throughput > 5 * 1024 else -1
+    print(f"\nTotal time {total_time}s, total throughput {total_throughput/(1024 * 1024)} MBps")
+    return total_throughput
 
 
 def parse_args():
@@ -627,7 +627,7 @@ def vpn_list_main(args):
 
 def main(args):
     if args.speedtest:
-        return speedtest()
+        return 0 if speedtest() > 500 * 1024 else 1
     if args.ovpnfile:
         # Load a single VPN from the given file.
         return single_vpn_main(args)
