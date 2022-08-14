@@ -5,6 +5,8 @@ After=network-online.target
 ExecStart=/usr/lib/vpngate/vpngate-client --namespace %i
 RestartSec=10
 Restart=on-failure
+WorkingDirectory=/run/vpngate/
+RuntimeDirectory=vpngate
 
 [Install]
 WantedBy=multi-user.target

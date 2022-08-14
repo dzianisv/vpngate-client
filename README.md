@@ -1,11 +1,15 @@
 A client for connecting to [vpngate.net](http://vpngate.net) OpenVPN servers.
 
 __Features__:
-* filters VPN servers by their geographical location (country or VPNs in Europe)
-* probes the VPN endpoints to detect ones that aren't responding for some reason
-before connecting to the VPN server
-* once connected, performs a speed-test for the VPN and lets you decide if the
-speed is good enough for you or if you want to try the next one on the list
+* Discovers OpenVPN servers on vpngate.net.
+* Probes the VPN endpoints to detect ones that aren't responding for some reason
+before connecting to the VPN server.
+* Once connected, performs a speed-test for the VPN and lets you decide if the
+speed is good enough for you or if you want to try the next one on the list.
+* Cross-ARCH `.deb` packages.
+* `namespaced-openvpn` script creates a Linux network namespace with OpenVPN `tun0` only to prevent packet leaks on OpenVPN failures.
+* `vpngate.service` and `vpngate@netns.service` systemd services for GNU/Linux distributions.
+* Filters VPN servers by their geographical location (country or VPNs in Europe).
 
 ## Dependencies
 This client has following dependencies:
