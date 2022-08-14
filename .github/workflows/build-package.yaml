@@ -17,6 +17,9 @@ jobs:
       - name: Install Dev depedencies
         run: sudo ./package-install-dev-dependencies.sh
       
+      - name: Lint
+        run: pylint ./namespaced-openvpn
+
       - name: Build Package
         run: ./package-build.sh
 

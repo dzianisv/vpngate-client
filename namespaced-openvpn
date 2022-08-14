@@ -248,24 +248,24 @@ def route_up(args):
 
 def routeup_from_config(config_file_obj):
     """Extract any preexisting route-up directive from an OpenVPN config."""
-    route_up = None
+    _route_up = None
     for line in config_file_obj:
         match = re.match(r'\s*route-up (.*)', line)
         if match:
-            route_up = match.group(1).strip()
-    if route_up:
+            _route_up = match.group(1).strip()
+    if _route_up:
         # openvpn's config parser requires that script directives only take
         # a single argument, so the executable has to be quoted together with
         # its arguments. strip off a layer of " as necessary:
-        if route_up.startswith('"'):
+        if _route_up.startswith('"'):
             # this does not check if the final quote is escaped, but it's fine,
             # we can be a little more permissive than openvpn itself
-            if route_up.endswith('"'):
-                return route_up[1:-1]
+            if _route_up.endswith('"'):
+                return _route_up[1:-1]
             else:
                 raise ValueError('Bad route-up directive', route_up)
         else:
-            return route_up
+            return _route_up
     else:
         return None
 
@@ -393,8 +393,7 @@ def main():
         '%s %s %s %s %s' % (script_name, namespace, args.dns, preexisting_routeup, disable_arg)
     ]
     logging.info("%r", execv_args)
-    os.execv(OPENVPN_CMD, execv_args)
-
+    return os.execv(OPENVPN_CMD, execv_args)
 
 if __name__ == '__main__':
     sys.exit(main())
