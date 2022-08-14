@@ -236,8 +236,8 @@ class VPN:
 
         command = ([
             os.path.join(os.path.dirname(__file__), "namespaced-openvpn"),
-            "--namespace",
-            NAMESPACE,
+            "--namespace", NAMESPACE,
+            "--dns", "1.1.1.1,8.8.8.8,9.9.9.9"
         ] if NAMESPACE else ["openvpn"]) + [
             "--script-security", "2",
             "--route-up", up 
