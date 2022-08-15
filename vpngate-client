@@ -14,11 +14,14 @@ import sys
 import tempfile
 import time
 import urllib.request
+import threading
+import typing
 
 # The URL for the VPN list
 VPN_LIST_URL = "https://www.vpngate.net/api/iphone/"
 SPEED_TEST_URL = "https://cachefly.cachefly.net/10mb.test"
-NAMESPACE = "protected"
+NAMESPACE: typing.Optional[str] = None
+RELOAD_EVENT: threading.Event = threading.Event()
 
 logger = logging.getLogger()
 
@@ -212,13 +215,15 @@ class VPN:
 
                     try:
                         i = 0
-                        while self.speedtest():
+                        while not RELOAD_EVENT.is_set() or self.speedtest():
                             i += 1
                             self.logger.debug("Periodic %dth speed test passed", i)
-                            time.sleep(60 * 5)
+                            RELOAD_EVENT.wait(5 * 60)
                     except KeyboardInterrupt:
                         pass
                     finally:
+                        # event is received, clear() state
+                        RELOAD_EVENT.clear()
                         if self.args.iptables:
                             self.clear_iptables_rules()
                         self.logger.info("Closing VPN connection.")
@@ -624,10 +629,16 @@ def vpn_list_main(args):
     logger.info("Exiting...")
 
 
+def sighup_handler(signo: int, stackframe):
+    logger.info("received signal %d", signo)
+    RELOAD_EVENT.set()
 
 def main(args):
     if args.speedtest:
         return 0 if speedtest() > 500 * 1024 else 1
+    
+    signal.signal(signal.SIGHUP, sighup_handler)
+
     if args.ovpnfile:
         # Load a single VPN from the given file.
         return single_vpn_main(args)
