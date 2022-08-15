@@ -452,7 +452,7 @@ class VPNList:
         self.logger.info("Loading VPN list from %s", self.args.url)
 
         # Read the data
-        req = urllib.request.urlopen(self.args.url)
+        req = urllib.request.urlopen(self.args.url, timeout=10)
         data = io.TextIOWrapper(req, encoding='utf8')
 
         # The first and last lines start with an asterix; ignore them
